@@ -1,7 +1,8 @@
 use std::collections::HashMap;
 
 use egui::{
-    epaint::{PathShape, RectShape}, pos2, remap, vec2, Color32, Rect, Rgba, RichText, Rounding, Sense, Shape, Stroke, TextStyle, Vec2, WidgetText
+    epaint::{PathShape, RectShape},
+    pos2, remap, vec2, Color32, CornerRadius, Rect, Rgba, RichText, Sense, Shape, Stroke, StrokeKind, TextStyle, Vec2, WidgetText,
 };
 
 use renet::{ClientId, NetworkInfo, RenetServer};
@@ -365,12 +366,13 @@ fn show_graph(
 
         let body = Shape::Rect(RectShape {
             rect,
-            rounding: Rounding::ZERO,
             fill: Rgba::TRANSPARENT.into(),
             stroke: style.rectangle_stroke,
-            uv: Rect::ZERO,
-            fill_texture_id: egui::TextureId::Managed(0),
+            stroke_kind: StrokeKind::Inside,
             blur_width: 0.0,
+            corner_radius: CornerRadius::ZERO,
+            round_to_pixels: None,
+            brush: None,
         });
         ui.painter().add(body);
         let init_point = rect.left_bottom();
@@ -381,7 +383,7 @@ fn show_graph(
             .enumerate()
             .map(|(i, value)| {
                 let x = remap(i as f32, 0.0..=size as f32, 0.0..=style.width);
-                let y = remap(*value, min..=max, 0.0..=style.height);
+                let y = if max == 0.0 { 0.0 } else { remap(*value, min..=max, 0.0..=style.height) };
 
                 pos2(x + init_point.x, init_point.y - y)
             })
